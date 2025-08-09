@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Icons chạy quanh - lặp chuỗi</title>
+  <style>
+    :root{
+      --size: 70px;       /* kích thước icon */
+      --radius: 180px;    /* bán kính quỹ đạo */
+      --orbit-speed: 18s; /* thời gian quay tròn */
+      --bg: #0f172a;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      background: linear-gradient(180deg,#071026,#0b1b2a 60%);
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      color:#fff;
+      overflow:hidden;
+    }
+    .stage{
+      position:relative;
+      width:100%;
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    /* trung tâm cho quỹ đạo */
+    .orbit-center{
+      position:relative;
+      width: calc(var(--radius) * 2 + var(--size));
+      height: calc(var(--radius) * 2 + var(--size));
+      /* đặt thằng này ở giữa stage */
+      display:block;
+      transform-style: preserve-3d;
+      will-change: transform;
+      animation: spin var(--orbit-speed) linear infinite;
+    }
+
+    /* icon container (mỗi icon là con của orbit-center) */
+    .orbiter{
+      --s: var(--size);
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:var(--s);
+      height:var(--s);
+      margin-left: calc(var(--s) / -2);
+      margin-top: calc(var(--s) / -2);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:50%;
+      box-shadow: 0 8px 20px rgba(2,6,23,0.6), inset 0 -6px 12px rgba(255,255,255,0.03);
+      background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      backdrop-filter: blur(4px);
+      font-weight:600;
+      font-size:12px;
+      text-align:center;
+      padding:6px;
+      line-height:1;
+      transform-origin: center;
+      transition: transform .25s ease;
+    }
+
+    /* phần text bên trong, nếu dài sẽ xuống dòng */
+    .orbiter .txt{
+      transform: rotate(0deg); /* giữ chữ đứng thẳng */
+      
+      pointer-events:none;
+      user-select:none;
+      
+    }
+
+    /* giữ icon "đứng thẳng" bằng counter-rotate (JS đặt góc) */
+    /* hiệu ứng hover tạm dừng quay và phóng to icon */
+    .stage:hover .orbit-center{ animation-play-state: paused; }
+    .orbiter:hover{
+      transform: scale(1.12) !important;
+      box-shadow: 0 18px 40px rgba(2,6,23,0.7);
+    }
+
+    /* animation quay toàn bộ quỹ đạo */
+    @keyframes spin{
+      from{ transform: rotate(0deg); }
+      to  { transform: rotate(360deg); }
+    }
+
+    /* gợi ý nhỏ ở góc */
+    .hint{
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      background: rgba(255,255,255,0.04);
+      padding:8px 12px;
+      border-radius:8px;
+      font-size:13px;
+      color:#cfe8ff;
+      backdrop-filter: blur(3px);
+    }
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="orbit-center" id="orbit"></div>
+    <div class="hint">Hover để tạm dừng & phóng to icon</div>
+  </div>
+
+  <script>
+    /******************** CẤU HÌNH ********************/
+    const N_ICONS = 20;                 // số icon trên quỹ đạo
+    const RADIUS_PX = 18000;              // bán kính (px) - trùng với CSS var --radius
+    const TEXT_TO_REPEAT = "rep chuỗi đi bạn";       // chuỗi muốn lặp
+    const TIMES_REPEAT = 1;             // lặp bao nhiêu lần trong mỗi icon
+    const ICON_SIZE = 70;               // kích thước icon (px) - trùng với CSS var --size
+    /***************************************************/
+
+    const orbit = document.getElementById('orbit');
+
+    // cập nhật css vars từ JS (dễ chỉnh runtime)
+    document.documentElement.style.setProperty('--radius', RADIUS_PX + 'px');
+    document.documentElement.style.setProperty('--size', ICON_SIZE + 'px');
+
+    // tạo N_ICON orbiter quanh trung tâm
+    for(let i=0;i<N_ICONS;i++){
+      const a = (360 / N_ICONS) * i; // góc độ
+      const orb = document.createElement('div');
+      orb.className = 'orbiter';
+
+      // nội dung text lặp
+      const txt = document.createElement('div');
+      txt.className = 'txt';
+      txt.innerText = Array(TIMES_REPEAT).fill(TEXT_TO_REPEAT).join(' ');
+      orb.appendChild(txt);
+
+      // vị trí: rotate(angle) translate(radius) rotate(-angle) để icon không bị xoay
+      orb.style.transform = `rotate(${a}deg) translate(${RADIUS_PX}px) rotate(${-a}deg)`;
+
+      // màu nền ngẫu nhiên nhẹ
+      const hue = Math.round((i / N_ICONS) * 360);
+      orb.style.background = `linear-gradient(135deg, hsla(${hue} 85% 60% / 0.14), hsla(${(hue+60)%360} 85% 50% / 0.06))`;
+      orb.style.border = `1px solid hsla(${hue} 80% 65% / 0.12)`;
+
+      // thêm shadow ngoài với sắc màu
+      orb.style.boxShadow = `0 8px 18px rgba(2,6,23,0.5), 0 0 14px hsla(${hue} 80% 60% / 0.06)`;
+
+      orbit.appendChild(orb);
+    }
+
+    // OPTIONAL: thay đổi tốc độ quay khi nhấn phím
+    let speed = 18; // giây
+    window.addEventListener('keydown', (e)=>{
+      if(e.key === '+' || e.key === '='){ speed = Math.max(4, speed - 2); updateSpeed(); }
+      if(e.key === '-' || e.key === '_'){ speed += 2; updateSpeed(); }
+    });
+    function updateSpeed(){
+      document.documentElement.style.setProperty('--orbit-speed', speed + 's');
+    }
+    updateSpeed();
+
+    // Responsive: khi window resize, bạn có thể điều chỉnh radius nếu màn hình bé
+    function adaptRadius(){
+      const w = Math.min(window.innerWidth, window.innerHeight);
+      const maxR = Math.floor((w - ICON_SIZE) / 2);
+      const r = Math.min(RADIUS_PX, Math.max(80, maxR));
+      document.documentElement.style.setProperty('--radius', r + 'px');
+      // cập nhật lại transform cho mỗi icon
+      const nodes = orbit.querySelectorAll('.orbiter');
+      nodes.forEach((n, idx)=>{
+        const angle = (360 / nodes.length) * idx;
+        n.style.transform = `rotate(${angle}deg) translate(${r}px) rotate(${-angle}deg)`;
+      });
+    }
+    window.addEventListener('resize', adaptRadius);
+    adaptRadius();
+    const orbitCenter = document.querySelector('.orbit-center');
+    orbitCenter.addEventListener('animationiteration', () => {}); // không làm gì, placeholder
+    let lastTime = null;
+    function update(){
+      const style = getComputedStyle(orbitCenter);
+      const matrix = style.transform || style.webkitTransform;
+      let rotation = 0;
+      if(matrix && matrix !== 'none'){
+        const values = matrix.split('(')[1].split(')')[0].split(',');
+        const a = values[0], b = values[1];
+        rotation = Math.round(Math.atan2(b, a) * (180/Math.PI));
+      }
+      document.querySelectorAll('.orbiter .txt').forEach(txt=>{
+        txt.style.transform = `rotate(${-rotation}deg)`;
+      });
+      requestAnimationFrame(update);
+    }
+    update();
+  </script>
+</body>
+</html>
