@@ -77,7 +77,8 @@
 
     /* giữ icon "đứng thẳng" bằng counter-rotate (JS đặt góc) */
     /* hiệu ứng hover tạm dừng quay và phóng to icon */
-    /*.stage:hover .orbit-center{ animation-play-state: paused; }
+     /* .stage:hover .orbit-center{ animation-play-state: paused; }
+      
     .orbiter:hover{
       transform: scale(1.12) !important;
       box-shadow: 0 18px 40px rgba(2,6,23,0.7);
@@ -151,7 +152,7 @@
     }
 
     // OPTIONAL: thay đổi tốc độ quay khi nhấn phím
-    let speed = 1800; // giây
+    let speed = 18; // giây
     window.addEventListener('keydown', (e)=>{
       if(e.key === '+' || e.key === '='){ speed = Math.max(4, speed - 2); updateSpeed(); }
       if(e.key === '-' || e.key === '_'){ speed += 2; updateSpeed(); }
@@ -197,9 +198,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
