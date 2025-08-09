@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>nguyễn văn sáu - troll troll</title>
+  <title>Icons chạy quanh - lặp chuỗi</title>
   <style>
     :root{
       --size: 70px;       /* kích thước icon */
@@ -112,9 +112,9 @@
 
   <script>
     /******************** CẤU HÌNH ********************/
-    const N_ICONS = 10;                 // số icon trên quỹ đạo
+    const N_ICONS = 20;                 // số icon trên quỹ đạo
     const RADIUS_PX = 18000;              // bán kính (px) - trùng với CSS var --radius
-    const TEXT_TO_REPEAT = "tí chơi game ko cu";       // chuỗi muốn lặp
+    const TEXT_TO_REPEAT = "hi con gà";       // chuỗi muốn lặp
     const TIMES_REPEAT = 1;             // lặp bao nhiêu lần trong mỗi icon
     const ICON_SIZE = 70;               // kích thước icon (px) - trùng với CSS var --size
     /***************************************************/
@@ -149,7 +149,76 @@
       orb.style.boxShadow = `0 8px 18px rgba(2,6,23,0.5), 0 0 14px hsla(${hue} 80% 60% / 0.06)`;
 
       orbit.appendChild(orb);
+      
     }
+    /* --- Thêm tính năng quay theo chuột + quán tính --- */
+  let isDragging = false;
+  let lastAngle = 0;
+  let velocity = 0;
+  let rotationDeg = 0;
+  let inertiaFrame;
+
+  const orbitCenterEl = document.querySelector('.orbit-center');
+  const rect = orbitCenterEl.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+
+  // Tắt animation CSS
+  orbitCenterEl.style.animation = 'none';
+
+  function setRotation(deg) {
+    orbitCenterEl.style.transform = `rotate(${deg}deg)`;
+  }
+
+  function getAngle(x, y) {
+    return Math.atan2(y - centerY, x - centerX) * 180 / Math.PI;
+  }
+
+  orbitCenterEl.addEventListener('mousedown', e => {
+    isDragging = true;
+    lastAngle = getAngle(e.clientX, e.clientY);
+    cancelAnimationFrame(inertiaFrame);
+  });
+
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const angle = getAngle(e.clientX, e.clientY);
+    let delta = angle - lastAngle;
+
+    // Đảm bảo delta không bị nhảy lớn do vượt qua -180/180
+    if (delta > 180) delta -= 360;
+    if (delta < -180) delta += 360;
+
+    rotationDeg += delta;
+    velocity = delta;
+    setRotation(rotationDeg);
+    lastAngle = angle;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    applyInertia();
+  });
+
+  function applyInertia() {
+  // Nếu vận tốc rất nhỏ, đặt vận tốc cố định để quay đều
+  if (Math.abs(velocity) <= 0.01) {
+    // Dùng vận tốc nhỏ để tiếp tục quay mãi
+    velocity = 0.2; // độ/khung hình (~12 độ/giây ở 60fps)
+  }
+  
+  rotationDeg += velocity;
+  setRotation(rotationDeg);
+  
+  // Giảm dần tốc độ nếu lớn, nhưng giữ tối thiểu
+  if (Math.abs(velocity) > 0.2) {
+    velocity *= 0.95;
+  }
+  
+  inertiaFrame = requestAnimationFrame(applyInertia);
+}
+    
 
     // OPTIONAL: thay đổi tốc độ quay khi nhấn phím
     let speed = 18; // giây
@@ -198,7 +267,3 @@
   </script>
 </body>
 </html>
-
-
-
-
