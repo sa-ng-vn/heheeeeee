@@ -151,7 +151,7 @@
     }
 
     // OPTIONAL: thay đổi tốc độ quay khi nhấn phím
-    let speed = 18; // giây
+    let speed = 1800; // giây
     window.addEventListener('keydown', (e)=>{
       if(e.key === '+' || e.key === '='){ speed = Math.max(4, speed - 2); updateSpeed(); }
       if(e.key === '-' || e.key === '_'){ speed += 2; updateSpeed(); }
@@ -197,4 +197,5 @@
   </script>
 </body>
 </html>
+
 
